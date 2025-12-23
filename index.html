@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RNA-seq Analysis Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        nav {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        nav a {
+            color: #667eea;
+            text-decoration: none;
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+
+        nav a:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h3 {
+            color: #764ba2;
+            font-size: 1.3em;
+            margin: 20px 0 10px 0;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .tool-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .tool-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .tool-badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+        }
+
+        .tool-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .tool-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tool-link {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .tool-link:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .workflow-diagram {
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .workflow-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .workflow-step {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .workflow-arrow {
+            font-size: 2em;
+            color: #667eea;
+        }
+
+        .code-example {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #667eea30 0%, #764ba230 100%);
+            padding: 3px 8px;
+            border-radius: 3px;
+        }
+
+        footer {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .contact-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .contact-links a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .workflow-steps {
+                flex-direction: column;
+            }
+            
+            .workflow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧬 RNA-seq Analysis Guide</h1>
+            <p class="subtitle">A Comprehensive Resource for Transcriptomics Analysis</p>
+            <p>From raw reads to differential expression: master the complete RNA-seq analysis workflow with practical tools, command-line examples, and best practices.</p>
+            
+            <nav>
+                <a href="#linux">Linux & Shell</a>
+                <a href="#qc-alignment">QC & Alignment</a>
+                <a href="#quantification">Read Counting</a>
+                <a href="#deseq2">DESeq2 Analysis</a>
+                <a href="#resources">Resources</a>
+            </nav>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">4</div>
+                <div class="stat-label">Main Topics</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">15+</div>
+                <div class="stat-label">Essential Tools</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Open Source</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">∞</div>
+                <div class="stat-label">Genes to Explore</div>
+            </div>
+        </div>
+
+        <div class="workflow-diagram">
+            <h3 style="text-align: center; color: #667eea; margin-bottom: 20px;">The Complete RNA-seq Pipeline</h3>
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div style="font-size: 2em;">📁</div>
+                    <div><strong>Raw FASTQ</strong></div>
+                    <div style="font-size: 0.9em; color: #666;">Sequencing Data</div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step">
+                    <div style="font-size: 2em;">✅</div>
+                    <div><strong>QC & Trim</strong></div>
+                    <div style="font-size: 0.9em; color: #666;">FastQC, Trimmomatic</div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step">
+                    <div style="font-size: 2em;">🎯</div>
+                    <div><strong>Alignment</strong></div>
+                    <div style="font-size: 0.9em; color: #666;">STAR, HISAT2</div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step">
+                    <div style="font-size: 2em;">📊</div>
+                    <div><strong>Counting</strong></div>
+                    <div style="font-size: 0.9em; color: #666;">featureCounts, HTSeq</div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step">
+                    <div style="font-size: 2em;">🔬</div>
+                    <div><strong>DESeq2</strong></div>
+                    <div style="font-size: 0.9em; color: #666;">Differential Expression</div>
+                </div>
+            </div>
+        </div>
+
+        <section id="linux">
+            <h2>🐧 Linux & Shell Scripting Basics</h2>
+            <p>Master the command-line fundamentals essential for bioinformatics analysis. These skills form the foundation of efficient RNA-seq data processing.</p>
+
+            <h3>Essential Commands</h3>
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">File Navigation</div>
+                        <div class="tool-badge">Basic</div>
+                    </div>
+                    <div class="tool-description">
+                        Navigate directories, list files, and understand file paths. Master pwd, cd, ls, and file globbing patterns.
+                    </div>
+                    <div class="code-example">cd /data/rnaseq/
+ls -lh *.fastq.gz
+pwd</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">File Operations</div>
+                        <div class="tool-badge">Basic</div>
+                    </div>
+                    <div class="tool-description">
+                        Copy, move, and manipulate files. Learn cp, mv, rm, and wildcard usage for batch operations.
+                    </div>
+                    <div class="code-example">cp sample*.fastq backup/
+mv old_results/ archive/
+rm temp_*.txt</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">Text Processing</div>
+                        <div class="tool-badge">Intermediate</div>
+                    </div>
+                    <div class="tool-description">
+                        Process text files with grep, sed, awk. Essential for parsing log files and extracting QC metrics.
+                    </div>
+                    <div class="code-example">grep "^@" sample.fastq | wc -l
+awk '{sum+=$3} END {print sum/NR}' \
+  counts.txt</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">Loops & Automation</div>
+                        <div class="tool-badge">Advanced</div>
+                    </div>
+                    <div class="tool-description">
+                        Automate repetitive tasks with for loops and bash scripts. Process multiple samples efficiently.
+                    </div>
+                    <div class="code-example">for file in *.fastq; do
+  echo "Processing $file"
+  fastqc $file
+done</div>
+                </div>
+            </div>
+
+            <h3>Useful Bash Scripting Patterns</h3>
+            <div class="code-example">#!/bin/bash
+# Process all RNA-seq samples
+
+SAMPLES="sample1 sample2 sample3"
+REF_GENOME="genome.fa"
+
+for sample in $SAMPLES; do
+    echo "Starting analysis for $sample"
+    
+    # Run QC
+    fastqc ${sample}_R1.fastq.gz ${sample}_R2.fastq.gz
+    
+    # Alignment
+    STAR --genomeDir $REF_GENOME \
+         --readFilesIn ${sample}_R1.fastq.gz ${sample}_R2.fastq.gz \
+         --readFilesCommand zcat \
+         --outFileNamePrefix ${sample}_
+    
+    echo "Completed $sample"
+done
+
+echo "All samples processed!"</div>
+        </section>
+
+        <section id="qc-alignment">
+            <h2>✅ RNA-seq QC & Alignment</h2>
+            <p>Ensure data quality and accurately map reads to the reference genome. Quality control and alignment are critical steps that determine downstream analysis success.</p>
+
+            <h3>Quality Control Tools</h3>
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">FastQC</div>
+                        <div class="tool-badge">Essential</div>
+                    </div>
+                    <div class="tool-description">
+                        Comprehensive quality assessment of high-throughput sequencing data. Generates detailed HTML reports with multiple QC metrics.
+                    </div>
+                    <div class="tool-links">
+                    <a href="https://bioconductor.org/packages/DESeq2/" target="_blank">Bioconductor</a>
+                    <a href="https://github.com/thelovelab/DESeq2" target="_blank">GitHub</a>
+                    <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4302049/" target="_blank">Paper</a>
+                </div>
+                <div class="code-example"># Load libraries
+library(DESeq2)
+library(ggplot2)
+
+# Read count matrix
+countData <- read.table("counts.txt", 
+  header=TRUE, row.names=1)
+
+# Sample information
+colData <- data.frame(
+  condition = factor(c("control", "control", "control",
+                      "treated", "treated", "treated")),
+  row.names = colnames(countData)
+)
+
+# Create DESeq2 dataset
+dds <- DESeqDataSetFromMatrix(
+  countData = countData,
+  colData = colData,
+  design = ~ condition
+)
+
+# Filter low count genes
+keep <- rowSums(counts(dds)) >= 10
+dds <- dds[keep,]
+
+# Run DESeq2 analysis
+dds <- DESeq(dds)
+
+# Extract results
+res <- results(dds, contrast=c("condition","treated","control"))
+
+# Shrink log2 fold changes
+resLFC <- lfcShrink(dds, coef="condition_treated_vs_control", 
+                    type="apeglm")
+
+# Summary
+summary(res)
+
+# Order by p-value
+resOrdered <- res[order(res$pvalue),]
+
+# Save results
+write.csv(as.data.frame(resOrdered), 
+          file="DESeq2_results.csv")</div>
+            </div>
+
+            <h3>Visualization & Quality Control</h3>
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">PCA Plot</div>
+                        <div class="tool-badge">QC</div>
+                    </div>
+                    <div class="tool-description">
+                        Principal Component Analysis to visualize sample relationships and identify batch effects or outliers.
+                    </div>
+                    <div class="code-example"># Variance stabilizing transformation
+vsd <- vst(dds, blind=FALSE)
+
+# PCA plot
+plotPCA(vsd, intgroup="condition") +
+  theme_minimal() +
+  ggtitle("PCA of Samples")</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">MA Plot</div>
+                        <div class="tool-badge">Visualization</div>
+                    </div>
+                    <div class="tool-description">
+                        Plot log fold change against mean expression to visualize differential expression across expression levels.
+                    </div>
+                    <div class="code-example">plotMA(resLFC, ylim=c(-5,5))
+
+# Identify top gene
+with(resLFC[topGene,], {
+  points(baseMean, log2FoldChange, 
+         col="red", cex=2)
+  text(baseMean, log2FoldChange, 
+       topGene, pos=4, col="red")
+})</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">Volcano Plot</div>
+                        <div class="tool-badge">Visualization</div>
+                    </div>
+                    <div class="tool-description">
+                        Scatter plot showing statistical significance versus magnitude of change. Perfect for identifying key differentially expressed genes.
+                    </div>
+                    <div class="code-example">library(EnhancedVolcano)
+
+EnhancedVolcano(res,
+  lab = rownames(res),
+  x = 'log2FoldChange',
+  y = 'pvalue',
+  pCutoff = 0.05,
+  FCcutoff = 1.5,
+  title = 'Treated vs Control')</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">Heatmap</div>
+                        <div class="tool-badge">Visualization</div>
+                    </div>
+                    <div class="tool-description">
+                        Hierarchical clustering heatmap of top differentially expressed genes to visualize expression patterns across samples.
+                    </div>
+                    <div class="code-example">library(pheatmap)
+
+# Select top 50 genes
+topGenes <- head(order(res$padj), 50)
+
+# Create heatmap
+pheatmap(assay(vsd)[topGenes,],
+  cluster_rows=TRUE,
+  cluster_cols=TRUE,
+  show_rownames=FALSE,
+  annotation_col=colData)</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">Gene Counts</div>
+                        <div class="tool-badge">Validation</div>
+                    </div>
+                    <div class="tool-description">
+                        Plot normalized counts for specific genes of interest to validate differential expression results.
+                    </div>
+                    <div class="code-example"># Plot counts for top gene
+plotCounts(dds, 
+  gene=topGene,
+  intgroup="condition",
+  returnData=FALSE)
+
+# Custom plot
+d <- plotCounts(dds, gene=topGene,
+  intgroup="condition", 
+  returnData=TRUE)
+  
+ggplot(d, aes(x=condition, y=count)) +
+  geom_point(position=position_jitter(w=0.1)) +
+  geom_boxplot(alpha=0.3) +
+  scale_y_log10()</div>
+                </div>
+            </div>
+
+            <h3>Functional Enrichment Analysis</h3>
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">clusterProfiler</div>
+                        <div class="tool-badge">GO/KEGG</div>
+                    </div>
+                    <div class="tool-description">
+                        Statistical analysis and visualization of functional profiles for genes and gene clusters. Supports GO, KEGG, Reactome, and more.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://bioconductor.org/packages/clusterProfiler/" target="_blank">Bioconductor</a>
+                        <a href="https://yulab-smu.top/biomedical-knowledge-mining-book/" target="_blank">Book</a>
+                    </div>
+                    <div class="code-example">library(clusterProfiler)
+library(org.Hs.eg.db)
+
+# Get significant genes
+sig_genes <- subset(res, padj < 0.05)
+gene_list <- sig_genes$log2FoldChange
+names(gene_list) <- rownames(sig_genes)
+
+# GO enrichment
+ego <- enrichGO(
+  gene = names(gene_list),
+  OrgDb = org.Hs.eg.db,
+  ont = "BP",
+  pAdjustMethod = "BH",
+  pvalueCutoff = 0.05
+)
+
+# Visualize
+dotplot(ego, showCategory=20)</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">GSEA</div>
+                        <div class="tool-badge">Pathway</div>
+                    </div>
+                    <div class="tool-description">
+                        Gene Set Enrichment Analysis identifies whether predefined gene sets show statistically significant differences between conditions.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://www.gsea-msigdb.org/" target="_blank">Website</a>
+                    </div>
+                    <div class="code-example">library(fgsea)
+
+# Prepare ranked gene list
+ranks <- res$stat
+names(ranks) <- rownames(res)
+ranks <- sort(ranks, decreasing=TRUE)
+
+# Load gene sets (e.g., Hallmark)
+pathways <- gmtPathways("h.all.v7.5.symbols.gmt")
+
+# Run GSEA
+fgseaRes <- fgsea(
+  pathways = pathways,
+  stats = ranks,
+  minSize = 15,
+  maxSize = 500
+)
+
+# Plot enrichment
+plotEnrichment(pathways[["HALLMARK_APOPTOSIS"]], 
+               ranks)</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">gprofiler2</div>
+                        <div class="tool-badge">Multi-Database</div>
+                    </div>
+                    <div class="tool-description">
+                        R interface to g:Profiler for functional enrichment analysis. Queries multiple databases including GO, KEGG, Reactome, WikiPathways.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://biit.cs.ut.ee/gprofiler/" target="_blank">Website</a>
+                        <a href="https://cran.r-project.org/package=gprofiler2" target="_blank">CRAN</a>
+                    </div>
+                    <div class="code-example">library(gprofiler2)
+
+gostres <- gost(
+  query = rownames(sig_genes),
+  organism = "hsapiens",
+  significant = TRUE
+)
+
+# Interactive plot
+gostplot(gostres)</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">pathfindR</div>
+                        <div class="tool-badge">Network</div>
+                    </div>
+                    <div class="tool-description">
+                        Enrichment analysis using active subnetworks. Identifies enriched pathways by mapping genes to protein-protein interaction networks.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://github.com/egeulgen/pathfindR" target="_blank">GitHub</a>
+                    </div>
+                    <div class="code-example">library(pathfindR)
+
+# Prepare input
+input_df <- data.frame(
+  Gene = rownames(sig_genes),
+  logFC = sig_genes$log2FoldChange,
+  pval = sig_genes$pvalue
+)
+
+# Run analysis
+result <- run_pathfindR(input_df)</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="resources">
+            <h2>📚 Additional Resources</h2>
+            
+            <h3>Learning Materials</h3>
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">RNA-seqlopedia</div>
+                        <div class="tool-badge">Tutorial</div>
+                    </div>
+                    <div class="tool-description">
+                        Comprehensive guide to RNA-seq experiments and computational analysis. Covers experimental design through data interpretation.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://rnaseq.uoregon.edu/" target="_blank">Website</a>
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">Bioconductor Workflows</div>
+                        <div class="tool-badge">Tutorial</div>
+                    </div>
+                    <div class="tool-description">
+                        Official Bioconductor RNA-seq workflows including end-to-end analysis with DESeq2, edgeR, and visualization tools.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://www.bioconductor.org/help/workflows/" target="_blank">Workflows</a>
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">Harvard Chan Bioinformatics Core</div>
+                        <div class="tool-badge">Training</div>
+                    </div>
+                    <div class="tool-description">
+                        Excellent training materials covering NGS data analysis, RNA-seq, and R programming for bioinformatics.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://hbctraining.github.io/main/" target="_blank">Materials</a>
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">Galaxy Training</div>
+                        <div class="tool-badge">Interactive</div>
+                    </div>
+                    <div class="tool-description">
+                        Hands-on tutorials for RNA-seq analysis using Galaxy platform. Great for learning without command-line complexity.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://training.galaxyproject.org/" target="_blank">Platform</a>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Reference Databases</h3>
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">GENCODE</div>
+                        <div class="tool-badge">Annotation</div>
+                    </div>
+                    <div class="tool-description">
+                        High-quality reference gene annotation for human and mouse genomes. Essential for RNA-seq alignment and quantification.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://www.gencodegenes.org/" target="_blank">Website</a>
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">Ensembl</div>
+                        <div class="tool-badge">Database</div>
+                    </div>
+                    <div class="tool-description">
+                        Comprehensive genome browser and database. Download reference genomes, gene annotations, and functional information.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://www.ensembl.org/" target="_blank">Website</a>
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">GEO</div>
+                        <div class="tool-badge">Repository</div>
+                    </div>
+                    <div class="tool-description">
+                        Gene Expression Omnibus - public repository for high-throughput gene expression data. Access thousands of RNA-seq datasets.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://www.ncbi.nlm.nih.gov/geo/" target="_blank">Website</a>
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">MSigDB</div>
+                        <div class="tool-badge">Gene Sets</div>
+                    </div>
+                    <div class="tool-description">
+                        Molecular Signatures Database - collection of annotated gene sets for use with GSEA and pathway analysis.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://www.gsea-msigdb.org/gsea/msigdb/" target="_blank">Website</a>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Workflow Management</h3>
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">Nextflow</div>
+                        <div class="tool-badge">Pipeline</div>
+                    </div>
+                    <div class="tool-description">
+                        Workflow manager for data-driven computational pipelines. nf-core/rnaseq provides production-ready RNA-seq pipeline.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://www.nextflow.io/" target="_blank">Website</a>
+                        <a href="https://nf-co.re/rnaseq" target="_blank">nf-core/rnaseq</a>
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">Snakemake</div>
+                        <div class="tool-badge">Pipeline</div>
+                    </div>
+                    <div class="tool-description">
+                        Python-based workflow management system. Create reproducible and scalable data analyses with automatic job parallelization.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://snakemake.github.io/" target="_blank">Website</a>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Best Practices & Guidelines</h3>
+            <div class="highlight" style="padding: 20px; margin: 20px 0;">
+                <h4 style="color: #667eea; margin-bottom: 10px;">Key Recommendations</h4>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Experimental Design:</strong> Include biological replicates (minimum 3 per condition), consider batch effects, and randomize sample processing</li>
+                    <li><strong>Quality Control:</strong> Always run FastQC before and after trimming, check for adapter contamination, and monitor alignment rates</li>
+                    <li><strong>Alignment:</strong> Use STAR for splice-aware alignment, include gene annotations for better junction detection</li>
+                    <li><strong>Quantification:</strong> For gene-level analysis use featureCounts or HTSeq; for transcript-level use Salmon/Kallisto + tximport</li>
+                    <li><strong>Differential Expression:</strong> Filter low-count genes, use appropriate normalization, and apply FDR correction (padj < 0.05)</li>
+                    <li><strong>Visualization:</strong> Create PCA plots to check sample clustering, MA plots for DE assessment, and heatmaps for top genes</li>
+                    <li><strong>Validation:</strong> Validate key findings with qRT-PCR, examine individual gene plots, and perform functional enrichment analysis</li>
+                </ul>
+            </div>
+        </section>
+
+        <footer>
+            <h3 style="color: #667eea; margin-bottom: 10px;">About This Resource</h3>
+            <p>This guide provides a comprehensive overview of RNA-seq analysis from raw sequencing data to differential expression. All tools listed are open-source and widely used in the bioinformatics community.</p>
+            
+            <p style="margin-top: 15px;">Created with ❤️ for the bioinformatics community</p>
+            
+            <div class="contact-links">
+                <a href="mailto:karamveerverma37 @ gmail dot com">📧 Email</a>
+                <a href="https://github.com/karamveerverma37" target="_blank">💻 GitHub</a>
+                <a href="https://twitter.com/kveer5118" target="_blank">🐦 Twitter</a>
+            </div>
+            
+            <p style="margin-top: 20px; font-size: 0.9em; color: #666;">
+                Last updated: December 2025<br>
+                Content released under CC BY 4.0 License
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
+                        <a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">Website</a>
+                        <a href="https://github.com/s-andrews/FastQC" target="_blank">GitHub</a>
+                    </div>
+                    <div class="code-example">fastqc sample_R1.fastq.gz sample_R2.fastq.gz \
+  -o qc_results/ -t 4</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">MultiQC</div>
+                        <div class="tool-badge">Aggregation</div>
+                    </div>
+                    <div class="tool-description">
+                        Aggregate results from multiple bioinformatics analyses into a single report. Perfect for comparing QC across many samples.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://multiqc.info/" target="_blank">Website</a>
+                        <a href="https://github.com/ewels/MultiQC" target="_blank">GitHub</a>
+                    </div>
+                    <div class="code-example">multiqc qc_results/ \
+  -o multiqc_report/</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">Trimmomatic</div>
+                        <div class="tool-badge">Trimming</div>
+                    </div>
+                    <div class="tool-description">
+                        Remove low-quality bases and adapter sequences. Supports both single-end and paired-end reads with flexible trimming options.
+                    </div>
+                    <div class="tool-links">
+                        <a href="http://www.usadellab.org/cms/?page=trimmomatic" target="_blank">Website</a>
+                        <a href="https://github.com/usadellab/Trimmomatic" target="_blank">GitHub</a>
+                    </div>
+                    <div class="code-example">trimmomatic PE -threads 4 \
+  R1.fastq.gz R2.fastq.gz \
+  R1_paired.fq R1_unpaired.fq \
+  R2_paired.fq R2_unpaired.fq \
+  ILLUMINACLIP:adapters.fa:2:30:10 \
+  LEADING:3 TRAILING:3 \
+  SLIDINGWINDOW:4:15 MINLEN:36</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">fastp</div>
+                        <div class="tool-badge">All-in-One</div>
+                    </div>
+                    <div class="tool-description">
+                        Ultra-fast FASTQ preprocessing with QC, adapter trimming, and quality filtering in a single tool. Faster alternative to FastQC + Trimmomatic.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://github.com/OpenGene/fastp" target="_blank">GitHub</a>
+                    </div>
+                    <div class="code-example">fastp -i R1.fastq.gz -I R2.fastq.gz \
+  -o R1_clean.fastq.gz -O R2_clean.fastq.gz \
+  -h report.html -j report.json</div>
+                </div>
+            </div>
+
+            <h3>Alignment Tools</h3>
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">STAR</div>
+                        <div class="tool-badge">Recommended</div>
+                    </div>
+                    <div class="tool-description">
+                        Spliced Transcripts Alignment to a Reference. Ultra-fast RNA-seq aligner optimized for detecting splice junctions. Gold standard for RNA-seq.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://github.com/alexdobin/STAR" target="_blank">GitHub</a>
+                        <a href="https://physiology.med.cornell.edu/faculty/skrabanek/lab/angsd/lecture_notes/STARmanual.pdf" target="_blank">Manual</a>
+                    </div>
+                    <div class="code-example"># Index genome
+STAR --runMode genomeGenerate \
+  --genomeDir genome_index/ \
+  --genomeFastaFiles genome.fa \
+  --sjdbGTFfile genes.gtf \
+  --runThreadN 8
+
+# Align reads
+STAR --genomeDir genome_index/ \
+  --readFilesIn R1.fastq.gz R2.fastq.gz \
+  --readFilesCommand zcat \
+  --outFileNamePrefix sample_ \
+  --outSAMtype BAM SortedByCoordinate \
+  --runThreadN 8</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">HISAT2</div>
+                        <div class="tool-badge">Alternative</div>
+                    </div>
+                    <div class="tool-description">
+                        Hierarchical Indexing for Spliced Alignment of Transcripts. Memory-efficient alternative to STAR, great for limited computing resources.
+                    </div>
+                    <div class="tool-links">
+                        <a href="http://daehwankimlab.github.io/hisat2/" target="_blank">Website</a>
+                        <a href="https://github.com/DaehwanKimLab/hisat2" target="_blank">GitHub</a>
+                    </div>
+                    <div class="code-example"># Build index
+hisat2-build genome.fa genome_index
+
+# Align
+hisat2 -x genome_index \
+  -1 R1.fastq.gz -2 R2.fastq.gz \
+  -S output.sam -p 8</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">SAMtools</div>
+                        <div class="tool-badge">Post-Processing</div>
+                    </div>
+                    <div class="tool-description">
+                        Essential utilities for manipulating SAM/BAM files. Sort, index, and extract alignment statistics from your mapped reads.
+                    </div>
+                    <div class="tool-links">
+                        <a href="http://www.htslib.org/" target="_blank">Website</a>
+                        <a href="https://github.com/samtools/samtools" target="_blank">GitHub</a>
+                    </div>
+                    <div class="code-example"># Sort BAM
+samtools sort input.bam -o sorted.bam
+
+# Index BAM
+samtools index sorted.bam
+
+# Get stats
+samtools flagstat sorted.bam</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">RSeQC</div>
+                        <div class="tool-badge">QC</div>
+                    </div>
+                    <div class="tool-description">
+                        RNA-seq Quality Control package. Evaluate read distribution, junction saturation, inner distance, and other RNA-seq specific metrics.
+                    </div>
+                    <div class="tool-links">
+                        <a href="http://rseqc.sourceforge.net/" target="_blank">Website</a>
+                    </div>
+                    <div class="code-example">read_distribution.py \
+  -i sorted.bam -r genes.bed
+
+junction_saturation.py \
+  -i sorted.bam -r genes.bed \
+  -o output</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="quantification">
+            <h2>📊 Read Count Generation</h2>
+            <p>Quantify gene expression levels by counting reads aligned to genomic features. Choose between feature-based counting or transcript-level quantification.</p>
+
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">featureCounts</div>
+                        <div class="tool-badge">Recommended</div>
+                    </div>
+                    <div class="tool-description">
+                        Fast and efficient read counting tool from the Subread package. Highly accurate with excellent speed for both single-end and paired-end data.
+                    </div>
+                    <div class="tool-links">
+                        <a href="http://subread.sourceforge.net/" target="_blank">Website</a>
+                        <a href="https://academic.oup.com/bioinformatics/article/30/7/923/232889" target="_blank">Paper</a>
+                    </div>
+                    <div class="code-example">featureCounts -a genes.gtf \
+  -o counts.txt \
+  -T 8 -p -B -C \
+  sample1.bam sample2.bam sample3.bam
+
+# -p: paired-end
+# -B: both ends mapped
+# -C: exclude chimeric fragments
+# -T: threads</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">HTSeq-count</div>
+                        <div class="tool-badge">Classic</div>
+                    </div>
+                    <div class="tool-description">
+                        Widely-used Python tool for counting reads in genomic features. Offers flexible counting modes (union, intersection-strict, intersection-nonempty).
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://htseq.readthedocs.io/" target="_blank">Docs</a>
+                        <a href="https://github.com/htseq/htseq" target="_blank">GitHub</a>
+                    </div>
+                    <div class="code-example">htseq-count -f bam -r pos \
+  -s no -t exon -i gene_id \
+  -m union \
+  sorted.bam genes.gtf \
+  > counts.txt
+
+# -s: stranded (no/yes/reverse)
+# -m: mode (union/intersection)
+# -t: feature type
+# -i: attribute ID</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">Salmon</div>
+                        <div class="tool-badge">Alignment-Free</div>
+                    </div>
+                    <div class="tool-description">
+                        Ultra-fast transcript-level quantification without alignment. Uses k-mer based approach. Great for transcript-level analysis and isoform detection.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://salmon.readthedocs.io/" target="_blank">Docs</a>
+                        <a href="https://github.com/COMBINE-lab/salmon" target="_blank">GitHub</a>
+                    </div>
+                    <div class="code-example"># Index transcriptome
+salmon index -t transcripts.fa \
+  -i salmon_index
+
+# Quantify
+salmon quant -i salmon_index \
+  -l A -1 R1.fastq.gz -2 R2.fastq.gz \
+  -o salmon_output -p 8</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">Kallisto</div>
+                        <div class="tool-badge">Alignment-Free</div>
+                    </div>
+                    <div class="tool-description">
+                        Extremely fast pseudoalignment-based quantification. Requires minimal memory and is perfect for large-scale RNA-seq projects.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://pachterlab.github.io/kallisto/" target="_blank">Website</a>
+                        <a href="https://github.com/pachterlab/kallisto" target="_blank">GitHub</a>
+                    </div>
+                    <div class="code-example"># Build index
+kallisto index -i index.idx \
+  transcripts.fa
+
+# Quantify
+kallisto quant -i index.idx \
+  -o output -b 100 \
+  R1.fastq.gz R2.fastq.gz</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">RSEM</div>
+                        <div class="tool-badge">Isoform-Aware</div>
+                    </div>
+                    <div class="tool-description">
+                        RNA-Seq by Expectation-Maximization. Accurately quantifies transcript abundances accounting for uncertainty in read mapping to isoforms.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://deweylab.github.io/RSEM/" target="_blank">Website</a>
+                        <a href="https://github.com/deweylab/RSEM" target="_blank">GitHub</a>
+                    </div>
+                    <div class="code-example"># Prepare reference
+rsem-prepare-reference \
+  --gtf genes.gtf \
+  genome.fa ref/genome
+
+# Calculate expression
+rsem-calculate-expression \
+  -p 8 --paired-end \
+  R1.fastq.gz R2.fastq.gz \
+  ref/genome output</div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-title">tximport</div>
+                        <div class="tool-badge">R Package</div>
+                    </div>
+                    <div class="tool-description">
+                        Import transcript-level estimates from Salmon/Kallisto into R and summarize to gene-level for DESeq2. Essential bridge between quantifiers and DE analysis.
+                    </div>
+                    <div class="tool-links">
+                        <a href="https://bioconductor.org/packages/tximport/" target="_blank">Bioconductor</a>
+                    </div>
+                    <div class="code-example"># R code
+library(tximport)
+library(readr)
+
+files <- list.files("salmon_output",
+  pattern = "quant.sf", 
+  full.names = TRUE)
+  
+txi <- tximport(files, type = "salmon",
+  tx2gene = tx2gene)</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="deseq2">
+            <h2>🔬 DESeq2 Differential Expression Analysis</h2>
+            <p>Identify differentially expressed genes between experimental conditions. DESeq2 is the gold standard for RNA-seq differential expression analysis in R.</p>
+
+            <h3>Core DESeq2 Workflow</h3>
+            <div class="tool-card" style="margin: 20px 0;">
+                <div class="tool-header">
+                    <div class="tool-title">DESeq2</div>
+                    <div class="tool-badge">Essential</div>
+                </div>
+                <div class="tool-description">
+                    Differential gene expression analysis based on the negative binomial distribution. Handles library size normalization, dispersion estimation, and statistical testing with sophisticated shrinkage methods.
+                </div>
+                <div class="tool-links">
